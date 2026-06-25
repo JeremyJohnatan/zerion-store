@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 import { OrdersFilter } from "./OrdersFilter";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../../../../prisma/generated/client";
 
 export const dynamic = "force-dynamic";
 

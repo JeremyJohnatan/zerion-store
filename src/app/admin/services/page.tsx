@@ -4,7 +4,7 @@ import Link from "next/link";
 import { DeleteButton } from "./DeleteButton";
 import { ServicesFilter } from "./ServicesFilter";
 import { ToggleFeaturedButton } from "./ToggleFeaturedButton";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../../../../prisma/generated/client";
 
 export const dynamic = "force-dynamic";
 

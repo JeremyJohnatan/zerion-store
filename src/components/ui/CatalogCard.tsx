@@ -73,7 +73,7 @@ export const CatalogCard: React.FC<CatalogCardProps> = ({
 
           <Link
             href={href}
-            className="flex items-center justify-center px-5 h-10 bg-black text-white border-2 border-black rounded-sm font-extrabold uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 hover:bg-[#c8ff00] hover:text-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]"
+            className="flex items-center justify-center px-5 h-10 bg-black text-white border-2 border-black rounded-sm font-extrabold uppercase text-xs tracking-wider shadow-[3px_3px_0px_0px_#a1a1aa] transition-all duration-150 hover:bg-[#c8ff00] hover:text-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]"
           >
             Order →
           </Link>
