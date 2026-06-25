@@ -171,7 +171,7 @@ async function main() {
   await prisma.service.deleteMany();
 
   for (const service of services) {
-    const created = await prisma.service.create({ data: service });
+    const created = await prisma.service.create({ data: service as any });
     console.log(`  ✅ Created service: ${created.name} (${created.id})`);
   }
 
