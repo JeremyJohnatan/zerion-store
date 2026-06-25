@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ServiceType {
+  JOKI
+  APP_PREMIUM
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  phone         String?
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orders        Order[]
+}
+
+model Service {
+  id          String      @id @default(cuid())
+  gameName    String
+  category    String
+  name        String
+  description String?
+  basePrice   Float
+  imageUrl    String?
+  isFeatured  Boolean     @default(false)
+  type        ServiceType @default(JOKI)
+  orderItems  OrderItem[]
+  reviews     Review[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  userId          String?
+  user            User?         @relation(fields: [userId], references: [id])
+  customerName    String
+  customerPhone   String?
+  totalPrice      Float
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(UNPAID)
+  paymentUrl      String?
+  estimatedTime   String?       @default("Dalam antrean")
+  progress        Int           @default(0)
+  items           OrderItem[]
+  reviews         Review[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id])
+  quantity    Int
+  details     String?
+  price       Float
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  rating       Int
+  comment      String?
+  customerName String
+  serviceId    String
+  service      Service  @relation(fields: [serviceId], references: [id])
+  orderId      String?
+  order        Order?   @relation(fields: [orderId], references: [id])
+  isFeatured   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model ChatMessage {
+  id           String   @id @default(cuid())
+  roomId       String   @default("legacy") // Customer's unique ID (email or generated guest ID)
+  customerName String   @default("Pelanggan")
+  senderRole   String   // "CUSTOMER" or "ADMIN"
+  message      String
+  isRead       Boolean  @default(false)
+  isStarred    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([roomId, createdAt])
+}
