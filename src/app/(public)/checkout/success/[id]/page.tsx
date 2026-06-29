@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BrutalistButton } from "@/components/ui/BrutalistButton";
 import { OpenChatButton } from "@/components/ui/OpenChatButton";
+import { Xendit } from 'xendit-node';
 
 export default async function CheckoutSuccessPage({
   params,
@@ -21,13 +22,34 @@ export default async function CheckoutSuccessPage({
     redirect("/");
   }
 
+  let isPaid = order.paymentStatus === 'PAID';
+
+  // Fallback: If DB says UNPAID, check Xendit directly to prevent race conditions
+  if (!isPaid) {
+    try {
+      const xenditClient = new Xendit({ secretKey: process.env.XENDIT_SECRET_KEY || "" });
+      const invoices = await xenditClient.Invoice.getInvoices({ externalId: id });
+      
+      const paidInvoice = invoices.find(inv => inv.status === 'PAID' || inv.status === 'SETTLED');
+      
+      if (paidInvoice) {
+        isPaid = true;
+        // Self-heal the database
+        await prisma.order.update({
+          where: { id },
+          data: { paymentStatus: 'PAID' },
+        });
+      }
+    } catch (e) {
+      console.error("Failed to verify invoice with Xendit:", e);
+    }
+  }
+
   const formattedPrice = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(order.totalPrice);
-
-  const isPaid = order.paymentStatus === 'PAID';
 
   return (
     <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12 md:py-20 flex flex-col items-center">
