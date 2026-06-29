@@ -57,6 +57,14 @@ export async function POST(req: Request) {
       include: { items: { include: { service: true } } },
     });
 
+    // Determine Base URL for redirects
+    const getBaseUrl = () => {
+      if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+      if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+      return process.env.NEXTAUTH_URL || "http://localhost:3000";
+    };
+    const baseUrl = getBaseUrl();
+
     // Create Xendit Invoice
     const invoiceRequest = {
       externalId: order.id,
@@ -67,8 +75,8 @@ export async function POST(req: Request) {
         givenNames: order.customerName,
         mobileNumber: order.customerPhone || undefined,
       },
-      successRedirectUrl: `${process.env.NEXTAUTH_URL}/checkout/success/${order.id}`,
-      failureRedirectUrl: `${process.env.NEXTAUTH_URL}/checkout/success/${order.id}`,
+      successRedirectUrl: `${baseUrl}/checkout/success/${order.id}`,
+      failureRedirectUrl: `${baseUrl}/checkout/success/${order.id}`,
     };
 
     const invoice = await xenditClient.Invoice.createInvoice({ data: invoiceRequest });
