@@ -29,19 +29,20 @@ function LoginForm() {
       redirect: false,
     });
 
-    setIsLoading(false);
-
     if (res?.error) {
+      setIsLoading(false);
       setError("Email atau password salah.");
     } else {
-      // If callbackUrl exists, go there (e.g., /checkout)
-      // Otherwise, go to home (for customers) or /admin/dashboard (we don't know their role directly here without fetching session, but they can navigate naturally)
+      // Fetch session to determine role
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
+      
+      setIsLoading(false);
+      
       if (callbackUrl && callbackUrl !== "/") {
         router.push(callbackUrl);
       } else {
-        // Just go to home page, if they are admin, they can click admin portal
-        // Alternatively, hardcode redirect if email is admin email
-        if (email === "admin@zerionstore.com") {
+        if (session?.user?.role === "ADMIN") {
           router.push("/admin/dashboard");
         } else {
           router.push("/");
