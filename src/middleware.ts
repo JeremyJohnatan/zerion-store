@@ -10,6 +10,12 @@ export default withAuth({
         return token?.role === "ADMIN";
       }
 
+      // Allow public access to the checkout success page (receipts)
+      // This prevents cross-site redirect issues from payment gateways like Xendit
+      if (pathname.startsWith("/checkout/success")) {
+        return true;
+      }
+
       // Any logged in user can access /checkout and /profile
       if (pathname.startsWith("/checkout") || pathname.startsWith("/profile")) {
         return !!token;
