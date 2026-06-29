@@ -229,9 +229,12 @@ function AdminChatContent() {
       });
       const data = await res.json();
       if (data.success) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === tempMsg.id ? data.message : m))
-        );
+        setMessages((prev) => {
+          if (prev.some(m => m.id === data.message.id && m.id !== tempMsg.id)) {
+            return prev.filter(m => m.id !== tempMsg.id);
+          }
+          return prev.map((m) => (m.id === tempMsg.id ? data.message : m));
+        });
       }
     } catch (err) {
       console.error("Failed to send message:", err);

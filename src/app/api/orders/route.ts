@@ -59,6 +59,17 @@ export async function POST(req: Request) {
 
     // Determine Base URL for redirects
     const getBaseUrl = () => {
+      // 1. Try to get the exact domain the user is currently on
+      const origin = req.headers.get("origin");
+      if (origin) return origin;
+
+      const host = req.headers.get("host");
+      if (host) {
+        const protocol = host.includes("localhost") ? "http" : "https";
+        return `${protocol}://${host}`;
+      }
+
+      // 2. Fallbacks
       if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
       if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
       return process.env.NEXTAUTH_URL || "http://localhost:3000";
