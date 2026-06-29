@@ -204,20 +204,8 @@ function AdminChatContent() {
     setInput("");
     setIsSending(true);
 
-    const tempMsg: ChatMessage = {
-      id: `temp-${Date.now()}`,
-      roomId: selectedRoom,
-      customerName: "Admin",
-      senderRole: "ADMIN",
-      message: trimmedInput,
-      isRead: true,
-      isStarred: false,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, tempMsg]);
-
     try {
-      const res = await fetch("/api/chat", {
+      await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -227,15 +215,7 @@ function AdminChatContent() {
           message: trimmedInput,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setMessages((prev) => {
-          if (prev.some(m => m.id === data.message.id && m.id !== tempMsg.id)) {
-            return prev.filter(m => m.id !== tempMsg.id);
-          }
-          return prev.map((m) => (m.id === tempMsg.id ? data.message : m));
-        });
-      }
+      // Message will be automatically added by Supabase Realtime listener
     } catch (err) {
       console.error("Failed to send message:", err);
     } finally {
@@ -244,13 +224,21 @@ function AdminChatContent() {
   };
 
   const formatTime = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    let dateToParse = dateStr;
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+      dateToParse = dateStr + 'Z';
+    }
+    const d = new Date(dateToParse);
+    return d.toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" });
   };
 
   const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    let dateToParse = dateStr;
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+      dateToParse = dateStr + 'Z';
+    }
+    const d = new Date(dateToParse);
+    return d.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   };
 
   const selectedRoomData = rooms.find((r) => r.roomId === selectedRoom);

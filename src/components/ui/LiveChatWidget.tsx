@@ -124,19 +124,8 @@ export function LiveChatWidget() {
     setInput("");
     setIsSending(true);
 
-    const tempMsg: ChatMessage = {
-      id: `temp-${Date.now()}`,
-      roomId,
-      customerName,
-      senderRole: "CUSTOMER",
-      message: trimmedInput,
-      isRead: false,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, tempMsg]);
-
     try {
-      const res = await fetch("/api/chat", {
+      await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -146,17 +135,7 @@ export function LiveChatWidget() {
           message: trimmedInput,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setMessages((prev) => {
-          // If Realtime already inserted the message, remove the temp one
-          if (prev.some(m => m.id === data.message.id && m.id !== tempMsg.id)) {
-            return prev.filter(m => m.id !== tempMsg.id);
-          }
-          // Otherwise, replace the temp one with the real one
-          return prev.map((m) => (m.id === tempMsg.id ? data.message : m));
-        });
-      }
+      // Message will be automatically added by Supabase Realtime listener
     } catch (err) {
       console.error("Failed to send message:", err);
     } finally {
@@ -165,8 +144,13 @@ export function LiveChatWidget() {
   };
 
   const formatTime = (dateStr: string) => {
-    const d = new Date(dateStr);
+    let dateToParse = dateStr;
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+      dateToParse = dateStr + 'Z';
+    }
+    const d = new Date(dateToParse);
     return d.toLocaleTimeString("id-ID", {
+      timeZone: "Asia/Jakarta",
       hour: "2-digit",
       minute: "2-digit",
     });
